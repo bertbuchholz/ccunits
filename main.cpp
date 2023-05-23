@@ -189,19 +189,19 @@ DEFINE_MULTIPLICATION_SQUARE_OPERATOR(Area, Distance)
 
 Speed operator/(const Distance& lhs, const Duration& rhs) {
     Speed s;
-    s._value = lhs._value / rhs.count();
+    s._value = lhs._value / rhs._value;
     return s;
 }
 
 Distance operator*(const Speed& lhs, const Duration& rhs) {
     Distance d;
-    d._value = lhs._value * rhs.count();
+    d._value = lhs._value * rhs._value;
     return d;
 }
 
 Distance operator*(const Duration& lhs, const Speed& rhs) {
     Distance d;
-    d._value = rhs._value * lhs.count();
+    d._value = rhs._value * lhs._value;
     return d;
 }
 
@@ -215,13 +215,13 @@ DEFINE_ADDITION_OPERATOR(Angle)
 
 Energy operator*(const Power& lhs, const Duration& rhs) {
     Energy e;
-    e._value = lhs._value * rhs.count();
+    e._value = lhs._value * rhs._value;
     return e;
 }
 
 Energy operator*(const Duration& lhs, const Power& rhs) {
     Energy e;
-    e._value = rhs._value * lhs.count();
+    e._value = rhs._value * lhs._value;
     return e;
 }
 
@@ -241,7 +241,7 @@ DEFINE_MULTIPLICATION_OPERATOR(Energy, Force, Distance)
 
 Power operator/(const Energy& lhs, const Duration& rhs) {
     Power p;
-    p._value = lhs._value / rhs.count();
+    p._value = lhs._value / rhs._value;
     return p;
 }
 
@@ -255,7 +255,7 @@ DEFINE_MULTIPLICATION_OPERATOR(Force, Mass, Acceleration)
 
 Acceleration operator/(const Speed& lhs, const Duration& rhs) {
     Acceleration a;
-    a._value = lhs._value * rhs.count();
+    a._value = lhs._value * rhs._value;
     return a;
 }
 
@@ -269,7 +269,7 @@ DEFINE_MULTIPLICATION_OPERATOR(Momentum, Mass, Speed)
 
 Force operator/(const Momentum& lhs, const Duration& rhs) {
     Force f;
-    f._value = lhs._value / rhs.count();
+    f._value = lhs._value / rhs._value;
     return f;
 }
 
