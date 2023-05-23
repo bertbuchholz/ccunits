@@ -14,6 +14,15 @@ struct Conversion {
     constexpr static long int scale = scale_;
 };
 
+// Duration
+using Nanosecond = std::nano;
+using Microsecond = std::micro;
+using Millisecond = std::milli;
+using Second = std::ratio<1>;
+using Minute = std::ratio<60>;
+using Hour = std::ratio<3600>;
+using Day = std::ratio<3600 * 24>;
+
 // Distance
 using Nanometer = std::nano;
 using Micrometer = std::micro;
@@ -111,7 +120,6 @@ class Force : public Unit<Force>{};
 class Power : public Unit<Power>{};
 class Energy : public Unit<Energy>{};
 
-// TODO: Add operators via macro or template
 #define DEFINE_SCALAR_MULTIPLICATION(UnitType) UnitType operator*(const UnitType& lhs, const float rhs) { \
     UnitType u; \
     u._value = lhs._value * rhs; \
@@ -155,12 +163,13 @@ UnitTypeResult operator*(const UnitType2& lhs, const UnitType1& rhs) { \
     return r; \
 }
 
-#define DEFINE_DIVIDE_OPERATOR(UnitTypeResult, UnitType1, UnitType2) UnitTypeResult operator/(const UnitType1& lhs, const UnitType2& rhs) { \
+#define DEFINE_DIVISION_OPERATOR(UnitTypeResult, UnitType1, UnitType2) UnitTypeResult operator/(const UnitType1& lhs, const UnitType2& rhs) { \
     UnitTypeResult r; \
     r._value = lhs._value / rhs._value; \
     return r; \
 }
 
+DEFINE_SCALAR_MULTIPLICATION(Duration)
 DEFINE_SCALAR_MULTIPLICATION(Distance)
 DEFINE_SCALAR_MULTIPLICATION(Area)
 DEFINE_SCALAR_MULTIPLICATION(Speed)
@@ -173,105 +182,20 @@ DEFINE_SCALAR_MULTIPLICATION(Force)
 DEFINE_SCALAR_MULTIPLICATION(Power)
 DEFINE_SCALAR_MULTIPLICATION(Energy)
 
-Distance operator+(const Distance& lhs, const Distance& rhs) {
-    Distance d;
-    d._value = lhs._value + rhs._value;
-    return d;
-}
-
-//Area operator*(const Distance& lhs, const Distance& rhs) {
-//    Area a;
-//    a._value = lhs._value * rhs._value;
-//    return a;
-//}
-
-DEFINE_MULTIPLICATION_SQUARE_OPERATOR(Area, Distance)
-
-Speed operator/(const Distance& lhs, const Duration& rhs) {
-    Speed s;
-    s._value = lhs._value / rhs._value;
-    return s;
-}
-
-Distance operator*(const Speed& lhs, const Duration& rhs) {
-    Distance d;
-    d._value = lhs._value * rhs._value;
-    return d;
-}
-
-Distance operator*(const Duration& lhs, const Speed& rhs) {
-    Distance d;
-    d._value = rhs._value * lhs._value;
-    return d;
-}
-
+DEFINE_ADDITION_OPERATOR(Distance)
 DEFINE_ADDITION_OPERATOR(Angle)
 
-//Angle operator+(const Angle& lhs, const Angle& rhs) {
-//    Angle a;
-//    a._value = lhs._value + rhs._value;
-//    return a;
-//}
-
-Energy operator*(const Power& lhs, const Duration& rhs) {
-    Energy e;
-    e._value = lhs._value * rhs._value;
-    return e;
-}
-
-Energy operator*(const Duration& lhs, const Power& rhs) {
-    Energy e;
-    e._value = rhs._value * lhs._value;
-    return e;
-}
-
+DEFINE_MULTIPLICATION_SQUARE_OPERATOR(Area, Distance)
+DEFINE_DIVISION_OPERATOR(Speed, Distance, Duration)
+DEFINE_MULTIPLICATION_OPERATOR(Distance, Duration, Speed)
+DEFINE_MULTIPLICATION_OPERATOR(Energy, Power, Duration)
 DEFINE_MULTIPLICATION_OPERATOR(Energy, Force, Distance)
-
-//Energy operator*(const Force& lhs, const Distance& rhs) {
-//    Energy e;
-//    e._value = lhs._value * rhs._value;
-//    return e;
-//}
-//
-//Energy operator*(const Distance& lhs, const Force& rhs) {
-//    Energy e;
-//    e._value = rhs._value * lhs._value;
-//    return e;
-//}
-
-Power operator/(const Energy& lhs, const Duration& rhs) {
-    Power p;
-    p._value = lhs._value / rhs._value;
-    return p;
-}
-
+DEFINE_DIVISION_OPERATOR(Power, Energy, Duration)
 DEFINE_MULTIPLICATION_OPERATOR(Force, Mass, Acceleration)
-
-//Force operator*(const Mass& lhs, const Acceleration& rhs) {
-//    Force f;
-//    f._value = rhs._value * lhs._value;
-//    return f;
-//}
-
-Acceleration operator/(const Speed& lhs, const Duration& rhs) {
-    Acceleration a;
-    a._value = lhs._value * rhs._value;
-    return a;
-}
-
+DEFINE_DIVISION_OPERATOR(Acceleration, Speed, Duration)
 DEFINE_MULTIPLICATION_OPERATOR(Momentum, Mass, Speed)
+DEFINE_DIVISION_OPERATOR(Force, Momentum, Duration)
 
-//Momentum operator*(const Mass& lhs, const Speed& rhs) {
-//    Momentum m;
-//    m._value = lhs._value * rhs._value;
-//    return m;
-//}
-
-Force operator/(const Momentum& lhs, const Duration& rhs) {
-    Force f;
-    f._value = lhs._value / rhs._value;
-    return f;
-}
 
 namespace units {
 
@@ -297,69 +221,41 @@ Angle acos(const Area::Rep value) {
 
 }
 
-constexpr Distance operator""_m(const long double value) noexcept {
-    return Distance::from<Meter>(value);
+#define DEFINE_LITERAL(UnitType, Unit, Postfix) \
+constexpr UnitType operator""_##Postfix(const long double value) noexcept { \
+    return UnitType::from<Unit>(value); \
+} \
+\
+constexpr UnitType operator""_##Postfix(const unsigned long long int value) noexcept { \
+    return UnitType::from<Unit>(value); \
 }
+DEFINE_LITERAL(Duration, Nanosecond, ns)
+DEFINE_LITERAL(Duration, Microsecond, us)
+DEFINE_LITERAL(Duration, Millisecond, ms)
+DEFINE_LITERAL(Duration, Second, s)
+DEFINE_LITERAL(Duration, Minute, min)
+DEFINE_LITERAL(Duration, Hour, h)
 
-constexpr Distance operator""_m(const unsigned long long int value) noexcept {
-    return Distance::from<Meter>(value);
-}
+DEFINE_LITERAL(Distance, Millimeter, mm)
+DEFINE_LITERAL(Distance, Meter, m)
+DEFINE_LITERAL(Distance, Kilometer, km)
 
-constexpr Distance operator""_mm(const unsigned long long int value) noexcept {
-    return Distance::from<Millimeter>(value);
-}
+DEFINE_LITERAL(Angle, Radian, rad)
+DEFINE_LITERAL(Angle, Degree, deg)
 
-constexpr Distance operator""_km(const long double value) noexcept {
-    return Distance::from<Kilometer>(value);
-}
+DEFINE_LITERAL(Speed, MetersPerSecond, mps)
 
-constexpr Distance operator""_km(const unsigned long long int value) noexcept {
-    return Distance::from<Kilometer>(value);
-}
+DEFINE_LITERAL(Temperature, Kelvin, K)
+DEFINE_LITERAL(Temperature, Celsius, C)
 
-constexpr Angle operator""_rad(const long double value) noexcept {
-    return Angle::from<Radian>(value);
-}
+DEFINE_LITERAL(Energy, Joule, J)
 
-constexpr Angle operator""_deg(const long double value) noexcept {
-    return Angle::from<Degree>(value);
-}
+DEFINE_LITERAL(Power, Watt, W)
 
-constexpr Speed operator""_mps(const unsigned long long int value) noexcept {
-    return Speed::from<MetersPerSecond>(value);
-}
+DEFINE_LITERAL(Force, Newton, N)
 
-constexpr Speed operator""_mps(const long double value) noexcept {
-    return Speed::from<MetersPerSecond>(static_cast<double>(value));
-}
-
-constexpr Temperature operator""_K(const long double value) noexcept {
-    return Temperature::from<Kelvin>(static_cast<double>(value));
-}
-
-constexpr Temperature operator""_C(const long double value) noexcept {
-    return Temperature::from<Celsius>(value);
-}
-
-constexpr Energy operator""_J(const long double value) noexcept {
-    return Energy::from<Joule>(value);
-}
-
-constexpr Power operator""_W(const long double value) noexcept {
-    return Power::from<Watt>(value);
-}
-
-constexpr Force operator""_N(const long double value) noexcept {
-    return Force::from<Newton>(value);
-}
-
-constexpr Mass operator""_gr(const long double value) noexcept {
-    return Mass::from<Gram>(value);
-}
-
-constexpr Mass operator""_kg(const long double value) noexcept {
-    return Mass::from<Kilogram>(value);
-}
+DEFINE_LITERAL(Mass, Gram, gr)
+DEFINE_LITERAL(Mass, Kilogram, kg)
 
 int main() {
     //const auto someDistance = 1_km;
@@ -382,14 +278,16 @@ int main() {
 
     std::cout << Area::to<SquareMillimeter>(area) << "\n";
 
-    const auto speed = Distance::from<Kilometer>(1) / Duration(1.0);
+    // TODO: Add automatic conversion from std::chrono::duration to our duration
+
+    const auto speed = Distance::from<Kilometer>(1) / 1.0_s;
     std::cout << "1 kmps to mps: " << Speed::to<MetersPerSecond>(speed) << "\n";
     std::cout << "1 kmps to kmph: " << Speed::to<KilometersPerHour>(speed) << "\n";
     
-    std::cout << "10mps * 5s: " << Distance::to<Meter>(10_mps * 5s) << "\n";
+    std::cout << "10mps * 5s: " << Distance::to<Meter>(10_mps * 5.0_s) << "\n";
     
     const auto speedOfLight = Speed::from<MetersPerSecond>(299'792'458);
-    std::cout << "Speed of light * 1ns in cm: " << Distance::to<Centimeter>(speedOfLight * 1ns) << " cm\n";
+    std::cout << "Speed of light * 1ns in cm: " << Distance::to<Centimeter>(speedOfLight * 1.0_ns) << " cm\n";
 
     std::cout << Distance::to<Kilometer>(30.4_m) << "\n";
     std::cout << Distance::to<Kilometer>(30_km) << "\n";
@@ -416,14 +314,14 @@ int main() {
     
     // Doesn't compile because 20_kg * 5_mps is not a known size, needs parentheses
     // Acceleration::to<MetersPerSecondSquared>(20.0_kg * 5.0_mps / 1.0_s)
-    std::cout << "Acceleration 5mps/1s = 5m/s^2: " << Acceleration::to<MetersPerSecondSquared>(5.0_mps / 1.0s) << "\n";
+    std::cout << "Acceleration 5mps/1s = 5m/s^2: " << Acceleration::to<MetersPerSecondSquared>(5.0_mps / 1.0_s) << "\n";
     std::cout << "Momentum 10kg * 5mps = 50Ns: " << Momentum::to<NewtonSecond>(10.0_kg * 5_mps) << "\n";
     
-    std::cout << "Force 20kg * 5mps/s = 100N: " << Force::to<Newton>(20.0_kg * 5.0_mps / 1s) << "\n";
+    std::cout << "Force 20kg * 5mps/s = 100N: " << Force::to<Newton>(20.0_kg * 5.0_mps / 1.0_s) << "\n";
     
     std::cout << "Energy 10N * 5m = 50J: " << Energy::to<Joule>(10.0_N * 5.0_m) << "\n";
-    std::cout << "Energy 10W * 1s = 10Ws: " << Energy::to<Watt>(10.0_W * 1s) << "\n";
+    std::cout << "Energy 10W * 1s = 10Ws: " << Energy::to<Watt>(10.0_W * 1.0_s) << "\n";
     
-    std::cout << "Power 10Ws / 5s = 2W: " << Power::to<Watt>(10.0_W * 1s / 5.0s) << "\n";
-    std::cout << "Power 10kWh / 5h = 2kW: " << Power::to<Kilowatt>(10.0_W * 1000.0f * 1.0h / 5.0h) << "\n";
+    std::cout << "Power 10Ws / 5s = 2W: " << Power::to<Watt>(10.0_W * 1.0_s / 5.0_s) << "\n";
+    std::cout << "Power 10kWh / 5h = 2kW: " << Power::to<Kilowatt>(10.0_W * 1000.0f * 1.0_h / 5.0_h) << "\n";
 }
