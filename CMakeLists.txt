@@ -1,10 +1,18 @@
-cmake_minimum_required(VERSION 3.1...3.26)
+cmake_minimum_required(VERSION 3.18)
 
 project(
   CCUnits
   VERSION 1.0
   LANGUAGES CXX)
 
-add_executable(Test main.cpp)
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
-target_compile_features(Test PUBLIC cxx_std_17)
+include(Conan)
+run_conan()
+
+# Make sure cmake picks up the conan packages instead of locally installed ones.
+include(${CMAKE_BINARY_DIR}/conan_paths.cmake)
+
+add_subdirectory(lib)
+add_subdirectory(tests)
+add_subdirectory(examples)
