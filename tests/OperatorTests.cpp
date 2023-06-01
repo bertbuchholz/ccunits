@@ -2,6 +2,9 @@
 
 #include "Units.h"
 
+using namespace ccunits;
+using namespace ccunits::literals;
+
 TEST(Operators, Negative) {
     constexpr Length l1 = 1_m;
     constexpr Length l2 = -1_m;

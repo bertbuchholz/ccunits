@@ -2,6 +2,9 @@
 
 #include "Units.h"
 
+using namespace ccunits;
+using namespace ccunits::literals;
+
 int main() {
     constexpr float someLengthInKilometers = 0.001f;
 
@@ -43,7 +46,7 @@ int main() {
     std::cout << "Length 30.4m in km: " << Length::to<Kilometer>(30.4_m) << "\n";
     std::cout << "Length 30km in km: " << Length::to<Kilometer>(30_km) << "\n";
 
-    constexpr Angle pi = Angle::from<Radian>(units::constants::pi);
+    constexpr Angle pi = Angle::from<Radian>(ccunits::constants::pi);
 
     std::cout << "45 deg in radians: " << Angle::to<Radian>(45.0_deg) << "\n";
     std::cout << "90 deg in radians: " << Angle::to<Radian>(90.0_deg) << "\n";
@@ -52,12 +55,12 @@ int main() {
     std::cout << "pi in rad: " << Angle::to<Radian>(pi) << "\n";
     std::cout << "pi + 90 deg in degrees: " << Angle::to<Degree>(pi + 90.0_deg) << "\n";
 
-    std::cout << "Angle cos(M_PI * 0.5) = 0: " << std::cos(units::constants::pi * 0.5) << "\n";
-    std::cout << "Angle cos(90 deg): = 0: " << units::cos(90.0_deg) << "\n";
-    std::cout << "Angle acos(0) = 90 deg: " << Angle::to<Degree>(units::acos(0)) << "\n";
+    std::cout << "Angle cos(M_PI * 0.5) = 0: " << std::cos(ccunits::constants::pi * 0.5) << "\n";
+    std::cout << "Angle cos(90 deg): = 0: " << ccunits::math::cos(90.0_deg) << "\n";
+    std::cout << "Angle acos(0) = 90 deg: " << Angle::to<Degree>(ccunits::math::acos(0)) << "\n";
 
-    std::cout << "Angle atan2(1, 1) = 45 deg: " << Angle::to<Degree>(units::atan2(1, 1)) << "\n";
-    std::cout << "Angle atan2(1, 0) = 90 deg: " << Angle::to<Degree>(units::atan2(1, 0)) << "\n";
+    std::cout << "Angle atan2(1, 1) = 45 deg: " << Angle::to<Degree>(ccunits::math::atan2(1, 1)) << "\n";
+    std::cout << "Angle atan2(1, 0) = 90 deg: " << Angle::to<Degree>(ccunits::math::atan2(1, 0)) << "\n";
 
     constexpr Temperature temp = Temperature::from<Kelvin>(5.0);
     std::cout << "Temp: " << Temperature::to<Celsius>(temp) << "\n";

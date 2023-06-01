@@ -7,11 +7,10 @@
 
 using namespace std::chrono_literals;
 
-namespace units {
+namespace ccunits {
 namespace constants {
 constexpr double pi = 3.14159265359;
 }
-} // namespace units
 
 template<long long int factor_, long long int offset_, long long int scale_>
 struct Conversion {
@@ -144,14 +143,14 @@ public:
     }
 
 #define DEFINE_MATH_FUNCTION(UnitType, FunctionName) \
-    namespace units {                                \
+    namespace math {                                 \
     UnitType::Rep FunctionName(const Angle &a) {     \
         return std::FunctionName(a._value);          \
     }                                                \
     }
 
 #define DEFINE_INVERSE_MATH_FUNCTION(UnitType, FunctionName) \
-    namespace units {                                        \
+    namespace math {                                         \
     UnitType FunctionName(const UnitType::Rep value) {       \
         UnitType a;                                          \
         a._value = std::FunctionName(value);                 \
@@ -169,12 +168,14 @@ public:
     DEFINE_SELF_DIVISION(Name)
 
 #define DEFINE_LITERAL(UnitType, Unit, Postfix)                                            \
+    namespace literals {                                                                   \
     constexpr UnitType operator""_##Postfix(const long double value) noexcept {            \
         return UnitType::from<Unit>(value);                                                \
     }                                                                                      \
                                                                                            \
     constexpr UnitType operator""_##Postfix(const unsigned long long int value) noexcept { \
         return UnitType::from<Unit>(value);                                                \
+    }                                                                                      \
     }
 
 #define DEFINE_RELATION(UnitTypeResult, UnitType1, UnitType2)            \
@@ -289,7 +290,7 @@ DEFINE_CONVERSION_WITH_RATIO(
     std::ratio_divide<Kilometer COMMA std::chrono::hours::period>)
 
 DEFINE_CONVERSION(Angle, Radian, rad, 1, 1)
-DEFINE_CONVERSION_REAL_RATIO(Angle, Degree, deg, units::constants::pi, 180)
+DEFINE_CONVERSION_REAL_RATIO(Angle, Degree, deg, ccunits::constants::pi, 180)
 
 DEFINE_CONVERSION(Temperature, Kelvin, K, 1, 1)
 DEFINE_CONVERSION_OFFSET(Temperature, Celsius, C, 1, 273.15)
@@ -337,10 +338,11 @@ DEFINE_INVERSE_MATH_FUNCTION(Angle, asinh)
 DEFINE_INVERSE_MATH_FUNCTION(Angle, acosh)
 DEFINE_INVERSE_MATH_FUNCTION(Angle, atanh)
 
-namespace units {
+namespace math {
 Angle atan2(const double y, const double x) {
     Angle a;
     a._value = std::atan2(y, x);
     return a;
 }
-} // namespace units
+} // namespace math
+} // namespace ccunits
