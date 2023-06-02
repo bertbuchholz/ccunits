@@ -1,4 +1,5 @@
 enable_testing()
+
 find_package(GTest CONFIG REQUIRED)
 include(GoogleTest)
 
@@ -10,3 +11,5 @@ target_link_libraries(Tests
     UnitsLib
     GTest::gtest
     GTest::gtest_main)
+
+gtest_discover_tests(Tests)
