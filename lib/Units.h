@@ -19,43 +19,70 @@ struct Conversion {
     constexpr static long long int scale = scale_;
 };
 
-template<typename QuantityType>
+template<typename QuantityType_>
 class Quantity {
 public:
     using Rep = double;
+    using QuantityType = QuantityType_;
 
     Rep _value;
 
-    template<typename T, std::enable_if_t<std::is_integral<decltype(T::den)>::value, bool> = true>
+    template<
+        typename T,
+        std::enable_if_t<
+            std::is_integral<decltype(T::Conversion::den)>::value
+                && std::is_same_v<QuantityType, typename T::QuantityType>,
+            bool> = true>
     constexpr static QuantityType from(const Rep value) {
         QuantityType unit{};
-        unit._value = value * static_cast<Rep>(T::num) / static_cast<Rep>(T::den);
+        unit._value = value * static_cast<Rep>(T::Conversion::num) / static_cast<Rep>(T::Conversion::den);
         return unit;
     }
 
-    template<typename T, std::enable_if_t<std::is_integral<decltype(T::factor)>::value, bool> = true>
+    template<
+        typename T,
+        std::enable_if_t<
+            std::is_integral<decltype(T::Conversion::factor)>::value
+                && std::is_same_v<QuantityType, typename T::QuantityType>,
+            bool> = true>
     constexpr static QuantityType from(const Rep value) {
         QuantityType unit{};
-        unit._value = value * (static_cast<Rep>(T::factor) / static_cast<Rep>(T::scale))
-                      + (static_cast<Rep>(T::offset) / static_cast<Rep>(T::scale));
+        unit._value = value * (static_cast<Rep>(T::Conversion::factor) / static_cast<Rep>(T::Conversion::scale))
+                      + (static_cast<Rep>(T::Conversion::offset) / static_cast<Rep>(T::Conversion::scale));
         return unit;
     }
 
-    template<typename T, std::enable_if_t<std::is_integral<decltype(T::den)>::value, bool> = true>
+    template<
+        typename T,
+        std::enable_if_t<
+            std::is_integral<decltype(T::Conversion::den)>::value
+                && std::is_same_v<QuantityType, typename T::QuantityType>,
+            bool> = true>
     constexpr static Rep to(const QuantityType &unit) {
-        return unit._value * static_cast<Rep>(T::den) / static_cast<Rep>(T::num);
+        return unit._value * static_cast<Rep>(T::Conversion::den) / static_cast<Rep>(T::Conversion::num);
     }
 
-    template<typename T, std::enable_if_t<std::is_integral<decltype(T::factor)>::value, bool> = true>
+    template<
+        typename T,
+        std::enable_if_t<
+            std::is_integral<decltype(T::Conversion::factor)>::value
+                && std::is_same_v<QuantityType, typename T::QuantityType>,
+            bool> = true>
     constexpr static Rep to(const QuantityType &unit) {
-        return unit._value / (static_cast<Rep>(T::factor) / static_cast<Rep>(T::scale))
-               - (static_cast<Rep>(T::offset) / static_cast<Rep>(T::scale));
+        return unit._value / (static_cast<Rep>(T::Conversion::factor) / static_cast<Rep>(T::Conversion::scale))
+               - (static_cast<Rep>(T::Conversion::offset) / static_cast<Rep>(T::Conversion::scale));
     }
 
-    template<typename T, std::enable_if_t<std::is_integral<decltype(T::factor)>::value, bool> = true>
-    constexpr Rep to() {
-        return to<T>(*this);
-    }
+    // TODO: Reenable if needed/wanted
+    // template<
+    //     typename T,
+    //     std::enable_if_t<
+    //         std::is_integral<decltype(T::Conversion::factor)>::value
+    //             && std::is_same_v<QuantityType, typename T::QuantityType>,
+    //         bool> = true>
+    // constexpr Rep to() {
+    //     return to<T>(*this);
+    // }
 };
 
 #define DEFINE_SCALAR_MULTIPLICATION(QuantityType)                                      \
@@ -188,25 +215,37 @@ public:
     DEFINE_DIVISION_OPERATOR(QuantityType1, QuantityTypeResult, QuantityType2)       \
     DEFINE_DIVISION_OPERATOR(QuantityType2, QuantityTypeResult, QuantityType1)
 
-#define DEFINE_UNIT(QuantityType, UnitName, Literal, Numerator, Denominator)                     \
-    using UnitName = std::ratio<static_cast<long int>(Numerator), static_cast<long int>(Denominator)>; \
-    DEFINE_LITERAL(QuantityType, UnitName, Literal)
+#define DEFINE_UNIT(QuantityType_, UnitName, Literal, Numerator, Denominator)                                \
+    struct UnitName {                                                                                        \
+        using Conversion = std::ratio<static_cast<long int>(Numerator), static_cast<long int>(Denominator)>; \
+        using QuantityType = QuantityType_;                                                                  \
+    };                                                                                                       \
+    DEFINE_LITERAL(QuantityType_, UnitName, Literal)
 
-#define DEFINE_UNIT_WITH_RATIO(QuantityType, UnitName, Literal, Ratio) \
-    using UnitName = Ratio;                                                  \
-    DEFINE_LITERAL(QuantityType, UnitName, Literal)
+#define DEFINE_UNIT_WITH_RATIO(QuantityType_, UnitName, Literal, Ratio) \
+    struct UnitName {                                                   \
+        using Conversion = Ratio;                                       \
+        using QuantityType = QuantityType_;                             \
+    };                                                                  \
+    DEFINE_LITERAL(QuantityType_, UnitName, Literal)
 
-#define DEFINE_UNIT_REAL_RATIO(QuantityType, UnitName, Literal, Numerator, Denominator)     \
-    using UnitName =                                                                              \
-        std::ratio<static_cast<uint64_t>(Numerator * 1e10), static_cast<uint64_t>(Denominator * 1e10)>; \
-    DEFINE_LITERAL(QuantityType, UnitName, Literal)
+#define DEFINE_UNIT_REAL_RATIO(QuantityType_, UnitName, Literal, Numerator, Denominator)                    \
+    struct UnitName {                                                                                       \
+        using Conversion =                                                                                  \
+            std::ratio<static_cast<uint64_t>(Numerator * 1e10), static_cast<uint64_t>(Denominator * 1e10)>; \
+        using QuantityType = QuantityType_;                                                                 \
+    };                                                                                                      \
+    DEFINE_LITERAL(QuantityType_, UnitName, Literal)
 
-#define DEFINE_UNIT_OFFSET(QuantityType, UnitName, Literal, Factor, Offset) \
-    using UnitName = Conversion<                                                  \
-        static_cast<uint64_t>(Factor * 1e10L),                                          \
-        static_cast<uint64_t>(Offset * 1e10L),                                          \
-        static_cast<uint64_t>(1e10L)>;                                                  \
-    DEFINE_LITERAL(QuantityType, UnitName, Literal)
+#define DEFINE_UNIT_OFFSET(QuantityType_, UnitName, Literal, Factor, Offset) \
+    struct UnitName {                                                        \
+        using Conversion = Conversion<                                       \
+            static_cast<uint64_t>(Factor * 1e10L),                           \
+            static_cast<uint64_t>(Offset * 1e10L),                           \
+            static_cast<uint64_t>(1e10L)>;                                   \
+        using QuantityType = QuantityType_;                                  \
+    };                                                                       \
+    DEFINE_LITERAL(QuantityType_, UnitName, Literal)
 
 REGISTER_QUANTITY(Frequency) // TODO: Add literals, relations and use cases
 REGISTER_QUANTITY(Length)
@@ -216,12 +255,19 @@ REGISTER_QUANTITY(Speed)
 REGISTER_QUANTITY(Acceleration)
 REGISTER_QUANTITY(Mass)
 REGISTER_QUANTITY(Angle)
-REGISTER_QUANTITY(Temperature)
+REGISTER_QUANTITY(TemperatureDifference)
 REGISTER_QUANTITY(Momentum)
 REGISTER_QUANTITY(Force)
 REGISTER_QUANTITY(Power)
 REGISTER_QUANTITY(Energy)
 REGISTER_QUANTITY(Pressure)
+
+// Temperature is actually a TemperaturePoint and its meaning is equivalent
+// to that of time point and duration
+class Temperature : public Quantity<Temperature> {};
+DEFINE_SCALAR_MULTIPLICATION(Temperature)
+DEFINE_SELF_DIVISION(Temperature)
+DEFINE_COMPARISONS(Temperature)
 
 class Duration : public Quantity<Duration> {
 public:
@@ -234,10 +280,17 @@ public:
         _value = durationDouble.count();
     }
 };
-
 DEFINE_SCALAR_MULTIPLICATION(Duration)
 DEFINE_ADDITION_OPERATOR(Duration)
+DEFINE_SUBTRACTION_OPERATOR(Duration)
+DEFINE_NEGATIVE_OPERATOR(Duration)
+DEFINE_COMPARISONS(Duration)
+DEFINE_SELF_DIVISION(Duration)
 
+// This definition is not possible since DEFINE_RELATION defines the multiplication
+// operator twice for lhs * rhs and rhs * lhs which leads to a double defintion if
+// both quantities are the same
+// DEFINE_RELATION(Area, Length, Length)
 DEFINE_MULTIPLICATION_SQUARE_OPERATOR(Area, Length)
 
 // Volume = Area * Length and derived divisions etc.
@@ -250,6 +303,24 @@ DEFINE_RELATION(Force, Mass, Acceleration)
 DEFINE_RELATION(Force, Pressure, Area)
 DEFINE_RELATION(Momentum, Mass, Speed)
 DEFINE_RELATION(Momentum, Force, Duration)
+
+inline constexpr TemperatureDifference operator-(const Temperature &lhs, const Temperature &rhs) {
+    TemperatureDifference r{};
+    r._value = lhs._value - rhs._value;
+    return r;
+}
+
+inline constexpr Temperature operator+(const Temperature &lhs, const TemperatureDifference &rhs) {
+    Temperature r{};
+    r._value = lhs._value + rhs._value;
+    return r;
+}
+
+inline constexpr Temperature operator-(const Temperature &lhs, const TemperatureDifference &rhs) {
+    Temperature r{};
+    r._value = lhs._value - rhs._value;
+    return r;
+}
 
 DEFINE_UNIT_WITH_RATIO(Duration, Nanosecond, ns, std::nano)
 DEFINE_UNIT_WITH_RATIO(Duration, Microsecond, us, std::micro)
@@ -270,12 +341,28 @@ DEFINE_UNIT_WITH_RATIO(Length, Kilometer, km, std::kilo)
 // Putting the template argument in () to make it appear as a single argument and using a clever template construct
 // to derive the template argument by itself fails with MSVC.
 #define COMMA ,
-DEFINE_UNIT_WITH_RATIO(Area, SquareMillimeter, mm2, std::ratio_multiply<Millimeter COMMA Millimeter>)
-DEFINE_UNIT_WITH_RATIO(Area, SquareCentimeter, cm2, std::ratio_multiply<Centimeter COMMA Centimeter>)
+DEFINE_UNIT_WITH_RATIO(
+    Area,
+    SquareMillimeter,
+    mm2,
+    std::ratio_multiply<Millimeter::Conversion COMMA Millimeter::Conversion>)
+DEFINE_UNIT_WITH_RATIO(
+    Area,
+    SquareCentimeter,
+    cm2,
+    std::ratio_multiply<Centimeter::Conversion COMMA Centimeter::Conversion>)
 DEFINE_UNIT_WITH_RATIO(Area, SquareMeter, m2, std::ratio<1>)
-DEFINE_UNIT_WITH_RATIO(Area, SquareKilometer, km2, std::ratio_multiply<Kilometer COMMA Kilometer>)
+DEFINE_UNIT_WITH_RATIO(
+    Area,
+    SquareKilometer,
+    km2,
+    std::ratio_multiply<Kilometer::Conversion COMMA Kilometer::Conversion>)
 
-DEFINE_UNIT_WITH_RATIO(Volume, CubicMillimeter, nm3, std::ratio_multiply<SquareMillimeter COMMA Millimeter>)
+DEFINE_UNIT_WITH_RATIO(
+    Volume,
+    CubicMillimeter,
+    nm3,
+    std::ratio_multiply<SquareMillimeter::Conversion COMMA Millimeter::Conversion>)
 DEFINE_UNIT_WITH_RATIO(Volume, CubicMeter, m3, std::ratio<1>)
 
 DEFINE_UNIT_WITH_RATIO(Speed, MetersPerSecond, mps, std::ratio<1>)
@@ -283,13 +370,23 @@ DEFINE_UNIT_WITH_RATIO(
     Speed,
     KilometersPerHour,
     kmph,
-    std::ratio_divide<Kilometer COMMA std::chrono::hours::period>)
+    std::ratio_divide<Kilometer::Conversion COMMA std::chrono::hours::period>)
 
 DEFINE_UNIT(Angle, Radian, rad, 1, 1)
 DEFINE_UNIT_REAL_RATIO(Angle, Degree, deg, ccunits::constants::pi, 180)
 
 DEFINE_UNIT(Temperature, Kelvin, K, 1, 1)
-DEFINE_UNIT_OFFSET(Temperature, Celsius, C, 1, 273.15)
+// Don't provide a literal C because literals are unsigned only. If a user specifies -5_C, first 5 will be converted to
+// Kelvin -> 278K and then the minus applied, resulting in -278K (instead of the expected 268K).
+// DEFINE_UNIT_OFFSET(Temperature, Celsius, C, 1, 273.15)
+struct Celsius {
+    using Conversion =
+        Conversion<static_cast<uint64_t>(1e10L), static_cast<uint64_t>(273.15 * 1e10L), static_cast<uint64_t>(1e10L)>;
+    using QuantityType = Temperature;
+};
+
+DEFINE_UNIT(TemperatureDifference, dKelvin, dK, 1, 1)
+DEFINE_UNIT(TemperatureDifference, dCelsius, dC, 1, 1)
 
 DEFINE_UNIT(Pressure, Pascal, Pa, 1, 1)
 DEFINE_UNIT(Pressure, Hectopascal, hPa, 100, 1)
@@ -300,9 +397,6 @@ DEFINE_UNIT(Pressure, Millibar, mbar, 100, 1)
 DEFINE_UNIT_WITH_RATIO(Mass, Gram, gr, std::milli)
 DEFINE_UNIT_WITH_RATIO(Mass, Kilogram, kg, std::ratio<1>)
 
-// Energy
-DEFINE_UNIT_WITH_RATIO(Energy, Joule, J, std::ratio<1>)
-
 // Power
 DEFINE_UNIT_WITH_RATIO(Power, Microwatt, uW, std::micro)
 DEFINE_UNIT_WITH_RATIO(Power, Milliwatt, mW, std::milli)
@@ -310,6 +404,12 @@ DEFINE_UNIT_WITH_RATIO(Power, Watt, W, std::ratio<1>)
 DEFINE_UNIT_WITH_RATIO(Power, Kilowatt, kW, std::kilo)
 DEFINE_UNIT_WITH_RATIO(Power, Megawatt, MW, std::mega)
 DEFINE_UNIT_WITH_RATIO(Power, Gigawatt, GW, std::giga)
+
+// Energy
+DEFINE_UNIT_WITH_RATIO(Energy, Joule, J, std::ratio<1>)
+DEFINE_UNIT_WITH_RATIO(Energy, WattSecond, Ws, std::ratio_multiply<Watt::Conversion COMMA Second::Conversion>)
+DEFINE_UNIT_WITH_RATIO(Energy, WattHour, Wh, std::ratio_multiply<Watt::Conversion COMMA Hour::Conversion>)
+DEFINE_UNIT_WITH_RATIO(Energy, KilowattHour, kWh, std::ratio_multiply<std::kilo COMMA WattHour::Conversion>)
 
 // Force
 DEFINE_UNIT_WITH_RATIO(Force, Newton, N, std::ratio<1>)

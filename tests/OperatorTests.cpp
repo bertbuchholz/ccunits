@@ -45,14 +45,13 @@ TEST(Operators, Subtraction) {
 }
 
 TEST(Operators, ScalarMultiplication) {
-    constexpr Length l1 = 1_m;
-    constexpr Length l2 = 2_m;
+    constexpr Length l1 = 2_m;
 
-    EXPECT_EQ(Length::to<Meter>(5.0 * l2), 10.0);
-    EXPECT_EQ(Length::to<Meter>(l2 * 5.0), 10.0);
-    EXPECT_EQ(Length::to<Meter>(l2 * -5.0), -10.0);
-    EXPECT_EQ(Length::to<Meter>(-l2 * -5.0), 10.0);
-    EXPECT_EQ(l2 * 5.0, 10.0_m);
+    EXPECT_EQ(Length::to<Meter>(5.0 * l1), 10.0);
+    EXPECT_EQ(Length::to<Meter>(l1 * 5.0), 10.0);
+    EXPECT_EQ(Length::to<Meter>(l1 * -5.0), -10.0);
+    EXPECT_EQ(Length::to<Meter>(-l1 * -5.0), 10.0);
+    EXPECT_EQ(l1 * 5.0, 10.0_m);
     EXPECT_EQ(3_m * 5.0, 15.0_m);
 }
 

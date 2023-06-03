@@ -66,8 +66,8 @@ int main() {
     std::cout << "Temp: " << Temperature::to<Celsius>(temp) << "\n";
     std::cout << "Temp 5K in Celsius: " << Temperature::to<Celsius>(5.0_K) << "\n";
     std::cout << "Temp 5K in Kelvin: " << Temperature::to<Kelvin>(5.0_K) << "\n";
-    std::cout << "Temp 20C in Celsius: " << Temperature::to<Celsius>(20.0_C) << "\n";
-    std::cout << "Temp 20C in Kelvin: " << Temperature::to<Kelvin>(20.0_C) << "\n";
+    //std::cout << "Temp 20C in Celsius: " << Temperature::to<Celsius>(20.0_C) << "\n";
+    //std::cout << "Temp 20C in Kelvin: " << Temperature::to<Kelvin>(20.0_C) << "\n";
 
     std::cout << "Acceleration 5mps/1s = 5m/s^2: " << Acceleration::to<MetersPerSecondSquared>(5.0_mps / 1.0_s) << "\n";
     std::cout << "Momentum 10kg * 5mps = 50Ns: " << Momentum::to<NewtonSecond>(10.0_kg * 5_mps) << "\n";
@@ -75,7 +75,8 @@ int main() {
     std::cout << "Force 20kg * 5mps/s = 100N: " << Force::to<Newton>(20.0_kg * 5.0_mps / 1.0_s) << "\n";
 
     std::cout << "Energy 10N * 5m = 50J: " << Energy::to<Joule>(10.0_N * 5.0_m) << "\n";
-    std::cout << "Energy 10W * 1s = 10Ws: " << Energy::to<Watt>(10.0_W * 1.0_s) << "\n";
+
+    std::cout << "Energy 10W * 1s = 10Ws: " << Energy::to<WattSecond>(10.0_W * 1.0_s) << "\n";
 
     std::cout << "Power 10Ws / 5s = 2W: " << Power::to<Watt>(10.0_W * 1.0_s / 5.0_s) << "\n";
     std::cout << "Power 10kWh / 5h = 2kW: " << Power::to<Kilowatt>(10.0_W * 1000.0f * 1.0_hr / 5.0_hr) << "\n";

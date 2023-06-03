@@ -4,7 +4,9 @@ find_package(GTest CONFIG REQUIRED)
 include(GoogleTest)
 
 add_executable(Tests
-  OperatorTests.cpp)
+  ConversionTests.cpp
+  OperatorTests.cpp
+  RelationTests.cpp)
 
 target_link_libraries(Tests
   PRIVATE
