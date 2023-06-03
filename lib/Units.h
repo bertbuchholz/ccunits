@@ -51,111 +51,116 @@ public:
         return unit._value / (static_cast<Rep>(T::factor) / static_cast<Rep>(T::scale))
                - (static_cast<Rep>(T::offset) / static_cast<Rep>(T::scale));
     }
+
+    template<typename T, std::enable_if_t<std::is_integral<decltype(T::factor)>::value, bool> = true>
+    constexpr Rep to() {
+        return to<T>(*this);
+    }
 };
 
-#define DEFINE_SCALAR_MULTIPLICATION(UnitType)                           \
-    constexpr UnitType operator*(const UnitType &lhs, const float rhs) { \
-        UnitType u{};                                                    \
-        u._value = lhs._value * rhs;                                     \
-        return u;                                                        \
-    }                                                                    \
-                                                                         \
-    constexpr UnitType operator*(const float lhs, const UnitType &rhs) { \
-        UnitType u{};                                                    \
-        u._value = rhs._value * lhs;                                     \
-        return u;                                                        \
+#define DEFINE_SCALAR_MULTIPLICATION(UnitType)                                  \
+    inline constexpr UnitType operator*(const UnitType &lhs, const float rhs) { \
+        UnitType u{};                                                           \
+        u._value = lhs._value * rhs;                                            \
+        return u;                                                               \
+    }                                                                           \
+                                                                                \
+    inline constexpr UnitType operator*(const float lhs, const UnitType &rhs) { \
+        UnitType u{};                                                           \
+        u._value = rhs._value * lhs;                                            \
+        return u;                                                               \
     }
 
-#define DEFINE_ADDITION_OPERATOR(UnitType)                                   \
-    constexpr UnitType operator+(const UnitType &lhs, const UnitType &rhs) { \
-        UnitType r{};                                                        \
-        r._value = lhs._value + rhs._value;                                  \
-        return r;                                                            \
+#define DEFINE_ADDITION_OPERATOR(UnitType)                                          \
+    inline constexpr UnitType operator+(const UnitType &lhs, const UnitType &rhs) { \
+        UnitType r{};                                                               \
+        r._value = lhs._value + rhs._value;                                         \
+        return r;                                                                   \
     }
 
-#define DEFINE_SUBTRACTION_OPERATOR(UnitType)                                \
-    constexpr UnitType operator-(const UnitType &lhs, const UnitType &rhs) { \
-        UnitType r{};                                                        \
-        r._value = lhs._value - rhs._value;                                  \
-        return r;                                                            \
+#define DEFINE_SUBTRACTION_OPERATOR(UnitType)                                       \
+    inline constexpr UnitType operator-(const UnitType &lhs, const UnitType &rhs) { \
+        UnitType r{};                                                               \
+        r._value = lhs._value - rhs._value;                                         \
+        return r;                                                                   \
     }
 
-#define DEFINE_NEGATIVE_OPERATOR(UnitType)            \
-    constexpr UnitType operator-(const UnitType &v) { \
-        UnitType r{};                                 \
-        r._value = -v._value;                         \
-        return r;                                     \
+#define DEFINE_NEGATIVE_OPERATOR(UnitType)                   \
+    inline constexpr UnitType operator-(const UnitType &v) { \
+        UnitType r{};                                        \
+        r._value = -v._value;                                \
+        return r;                                            \
     }
 
-#define DEFINE_MULTIPLICATION_OPERATOR(UnitTypeResult, UnitType1, UnitType2)         \
-    constexpr UnitTypeResult operator*(const UnitType1 &lhs, const UnitType2 &rhs) { \
-        UnitTypeResult r{};                                                          \
-        r._value = lhs._value * rhs._value;                                          \
-        return r;                                                                    \
-    }                                                                                \
-                                                                                     \
-    constexpr UnitTypeResult operator*(const UnitType2 &lhs, const UnitType1 &rhs) { \
-        UnitTypeResult r{};                                                          \
-        r._value = lhs._value * rhs._value;                                          \
-        return r;                                                                    \
+#define DEFINE_MULTIPLICATION_OPERATOR(UnitTypeResult, UnitType1, UnitType2)                \
+    inline constexpr UnitTypeResult operator*(const UnitType1 &lhs, const UnitType2 &rhs) { \
+        UnitTypeResult r{};                                                                 \
+        r._value = lhs._value * rhs._value;                                                 \
+        return r;                                                                           \
+    }                                                                                       \
+                                                                                            \
+    inline constexpr UnitTypeResult operator*(const UnitType2 &lhs, const UnitType1 &rhs) { \
+        UnitTypeResult r{};                                                                 \
+        r._value = lhs._value * rhs._value;                                                 \
+        return r;                                                                           \
     }
 
-#define DEFINE_MULTIPLICATION_SQUARE_OPERATOR(UnitTypeResult, UnitType)            \
-    constexpr UnitTypeResult operator*(const UnitType &lhs, const UnitType &rhs) { \
-        UnitTypeResult r{};                                                        \
-        r._value = lhs._value * rhs._value;                                        \
-        return r;                                                                  \
+#define DEFINE_MULTIPLICATION_SQUARE_OPERATOR(UnitTypeResult, UnitType)                   \
+    inline constexpr UnitTypeResult operator*(const UnitType &lhs, const UnitType &rhs) { \
+        UnitTypeResult r{};                                                               \
+        r._value = lhs._value * rhs._value;                                               \
+        return r;                                                                         \
     }
 
-#define DEFINE_DIVISION_OPERATOR(UnitTypeResult, UnitType1, UnitType2)               \
-    constexpr UnitTypeResult operator/(const UnitType1 &lhs, const UnitType2 &rhs) { \
-        UnitTypeResult r{};                                                          \
-        r._value = lhs._value / rhs._value;                                          \
-        return r;                                                                    \
+#define DEFINE_DIVISION_OPERATOR(UnitTypeResult, UnitType1, UnitType2)                      \
+    inline constexpr UnitTypeResult operator/(const UnitType1 &lhs, const UnitType2 &rhs) { \
+        UnitTypeResult r{};                                                                 \
+        r._value = lhs._value / rhs._value;                                                 \
+        return r;                                                                           \
     }
 
-#define DEFINE_SELF_DIVISION(UnitType)                                     \
-    constexpr double operator/(const UnitType &lhs, const UnitType &rhs) { \
-        return lhs._value / rhs._value;                                    \
+#define DEFINE_SELF_DIVISION(UnitType)                                            \
+    inline constexpr double operator/(const UnitType &lhs, const UnitType &rhs) { \
+        return lhs._value / rhs._value;                                           \
     }
 
-#define DEFINE_COMPARISONS(UnitType)                            \
-    bool operator==(UnitType const &lhs, UnitType const &rhs) { \
-        return lhs._value == rhs._value;                        \
-    }                                                           \
-                                                                \
-    bool operator!=(UnitType const &lhs, UnitType const &rhs) { \
-        return lhs._value != rhs._value;                        \
-    }                                                           \
-    bool operator<(UnitType const &lhs, UnitType const &rhs) {  \
-        return lhs._value < rhs._value;                         \
-    }                                                           \
-                                                                \
-    bool operator>(UnitType const &lhs, UnitType const &rhs) {  \
-        return lhs._value > rhs._value;                         \
-    }                                                           \
-    bool operator<=(UnitType const &lhs, UnitType const &rhs) { \
-        return lhs._value <= rhs._value;                        \
-    }                                                           \
-                                                                \
-    bool operator>=(UnitType const &lhs, UnitType const &rhs) { \
-        return lhs._value >= rhs._value;                        \
+#define DEFINE_COMPARISONS(UnitType)                                   \
+    inline bool operator==(UnitType const &lhs, UnitType const &rhs) { \
+        return lhs._value == rhs._value;                               \
+    }                                                                  \
+                                                                       \
+    inline bool operator!=(UnitType const &lhs, UnitType const &rhs) { \
+        return lhs._value != rhs._value;                               \
+    }                                                                  \
+    inline bool operator<(UnitType const &lhs, UnitType const &rhs) {  \
+        return lhs._value < rhs._value;                                \
+    }                                                                  \
+                                                                       \
+    inline bool operator>(UnitType const &lhs, UnitType const &rhs) {  \
+        return lhs._value > rhs._value;                                \
+    }                                                                  \
+    inline bool operator<=(UnitType const &lhs, UnitType const &rhs) { \
+        return lhs._value <= rhs._value;                               \
+    }                                                                  \
+                                                                       \
+    inline bool operator>=(UnitType const &lhs, UnitType const &rhs) { \
+        return lhs._value >= rhs._value;                               \
     }
 
-#define DEFINE_MATH_FUNCTION(UnitType, FunctionName) \
-    namespace math {                                 \
-    UnitType::Rep FunctionName(const Angle &a) {     \
-        return std::FunctionName(a._value);          \
-    }                                                \
+#define DEFINE_MATH_FUNCTION(UnitType, FunctionName)    \
+    namespace math {                                    \
+    inline UnitType::Rep FunctionName(const Angle &a) { \
+        return std::FunctionName(a._value);             \
+    }                                                   \
     }
 
-#define DEFINE_INVERSE_MATH_FUNCTION(UnitType, FunctionName) \
-    namespace math {                                         \
-    UnitType FunctionName(const UnitType::Rep value) {       \
-        UnitType a;                                          \
-        a._value = std::FunctionName(value);                 \
-        return a;                                            \
-    }                                                        \
+#define DEFINE_INVERSE_MATH_FUNCTION(UnitType, FunctionName)  \
+    namespace math {                                          \
+    inline UnitType FunctionName(const UnitType::Rep value) { \
+        UnitType a;                                           \
+        a._value = std::FunctionName(value);                  \
+        return a;                                             \
+    }                                                         \
     }
 
 #define REGISTER_UNIT(Name)            \
@@ -167,15 +172,15 @@ public:
     DEFINE_COMPARISONS(Name)           \
     DEFINE_SELF_DIVISION(Name)
 
-#define DEFINE_LITERAL(UnitType, Unit, Postfix)                                            \
-    namespace literals {                                                                   \
-    constexpr UnitType operator""_##Postfix(const long double value) noexcept {            \
-        return UnitType::from<Unit>(value);                                                \
-    }                                                                                      \
-                                                                                           \
-    constexpr UnitType operator""_##Postfix(const unsigned long long int value) noexcept { \
-        return UnitType::from<Unit>(value);                                                \
-    }                                                                                      \
+#define DEFINE_LITERAL(UnitType, Unit, Postfix)                                                   \
+    namespace literals {                                                                          \
+    inline constexpr UnitType operator""_##Postfix(const long double value) noexcept {            \
+        return UnitType::from<Unit>(value);                                                       \
+    }                                                                                             \
+                                                                                                  \
+    inline constexpr UnitType operator""_##Postfix(const unsigned long long int value) noexcept { \
+        return UnitType::from<Unit>(value);                                                       \
+    }                                                                                             \
     }
 
 #define DEFINE_RELATION(UnitTypeResult, UnitType1, UnitType2)            \
@@ -186,15 +191,6 @@ public:
 #define DEFINE_CONVERSION(UnitType, ConversionName, Literal, Numerator, Denominator)                         \
     using ConversionName = std::ratio<static_cast<long int>(Numerator), static_cast<long int>(Denominator)>; \
     DEFINE_LITERAL(UnitType, ConversionName, Literal)
-
-// Needs some messing with templates for types that contain a comma, like ratio<1, 2>,
-// see https://stackoverflow.com/questions/13842468/comma-in-c-c-macro
-template<typename T>
-struct argument_type;
-template<typename T, typename U>
-struct argument_type<T(U)> {
-    using type = U;
-};
 
 #define DEFINE_CONVERSION_WITH_RATIO(UnitType, ConversionName, Literal, Ratio) \
     using ConversionName = Ratio;                                              \
@@ -339,7 +335,7 @@ DEFINE_INVERSE_MATH_FUNCTION(Angle, acosh)
 DEFINE_INVERSE_MATH_FUNCTION(Angle, atanh)
 
 namespace math {
-Angle atan2(const double y, const double x) {
+inline Angle atan2(const double y, const double x) {
     Angle a;
     a._value = std::atan2(y, x);
     return a;
