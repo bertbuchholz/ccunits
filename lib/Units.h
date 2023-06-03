@@ -175,11 +175,11 @@ public:
 #define DEFINE_LITERAL(QuantityType, Unit, Postfix)                                                   \
     namespace literals {                                                                              \
     inline constexpr QuantityType operator""_##Postfix(const long double value) noexcept {            \
-        return QuantityType::from<Unit>(value);                                                       \
+        return QuantityType::from<Unit>(static_cast<QuantityType::Rep>(value));                       \
     }                                                                                                 \
                                                                                                       \
     inline constexpr QuantityType operator""_##Postfix(const unsigned long long int value) noexcept { \
-        return QuantityType::from<Unit>(value);                                                       \
+        return QuantityType::from<Unit>(static_cast<QuantityType::Rep>(value));                       \
     }                                                                                                 \
     }
 

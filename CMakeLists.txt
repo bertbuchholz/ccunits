@@ -13,6 +13,8 @@ run_conan()
 # Make sure cmake picks up the conan packages instead of locally installed ones.
 include(${CMAKE_BINARY_DIR}/conan_paths.cmake)
 
+include(CompilerOptions)
+
 add_subdirectory(lib)
 add_subdirectory(tests)
 add_subdirectory(examples)

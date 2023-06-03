@@ -8,6 +8,7 @@ add_executable(Tests
 
 target_link_libraries(Tests
   PRIVATE
+    compiler_options
     UnitsLib
     GTest::gtest
     GTest::gtest_main)
