@@ -55,6 +55,20 @@ TEST(Operators, ScalarMultiplication) {
     EXPECT_EQ(3_m * 5.0, 15.0_m);
 }
 
+TEST(Operators, ScalarDivision) {
+    constexpr Length l1 = 2_m;
+
+    EXPECT_EQ(Length::to<Meter>(l1 / 2.5), 0.8);
+
+    // Not commutative
+    // EXPECT_EQ(Length::to<Meter>(2.5 / l1), -);
+
+    EXPECT_EQ(Length::to<Meter>(l1 / -5.0), -0.4);
+
+    EXPECT_EQ(l1 / 5.0, 0.4_m);
+    EXPECT_EQ(3_m / 5.0, 0.6_m);
+}
+
 TEST(Operators, SelfDivision) {
     constexpr Length l1 = 1_m;
     constexpr Length l2 = 2_m;
