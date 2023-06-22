@@ -91,8 +91,6 @@ The literal is `kmph`. The COMMA here is just a detail to deal with commas in ma
 
 ### Relations
 
-// TODO: Show the creation of the relation between length, time and speed
-
 Quantities are related via mathematical operations, for example, length is related to speed and duration as `length = speed * duration` and `speed = length / duration`. These relations between quantities must be explicitely defined.
 
 Defining the relation of  length, speed and duration:
@@ -148,7 +146,7 @@ Duration durationFromChrono = 1h;
 
 #### Temperature
 
-When people say temperature, they usually mean a temperature point ("It's 10 degrees Celsius.") and a conversion of that temperature point to, for example, Kelvin is straight forward. However, the difference between two temperatures is not a temperature (point) but a temperature difference due to the zero point in the scale. This is the same different between a duration and a time point. This means, the following operations are allowed:
+When people say temperature, they usually mean a temperature point ("It's 10 degrees Celsius.") and a conversion of that temperature point to, for example, Kelvin is straight forward. However, the difference between two temperatures is not a temperature (point) but a temperature difference due to the zero point in the scale. This is the same difference between a duration and a time point. This means, the following operations are allowed:
 ```
 TemperatureDifference +/- TemperatureDifference -> TemperatureDifference
 Temperature +/- TemperatureDifference -> Temperature
@@ -156,9 +154,6 @@ Temperature +/- TemperatureDifference -> Temperature
 It's not possible to add two Temperatures, in the same way it doesn't make sense to add two time points (see also point vs. vector in geometry).
 
 # Reference
-
-// TODO: Show the different macros for unit creation and what they do (what they set up for each unit) and
-//       what registering a quantity does
 
 ## Quantities
 

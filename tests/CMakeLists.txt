@@ -5,6 +5,7 @@ include(GoogleTest)
 
 add_executable(Tests
   ConversionTests.cpp
+  MathTests.cpp
   OperatorTests.cpp
   RelationTests.cpp)
 

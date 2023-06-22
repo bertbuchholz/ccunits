@@ -1,3 +1,6 @@
+#ifndef CCUNITS_UNITS_H
+#define CCUNITS_UNITS_H
+
 #include <chrono>
 #include <cmath>
 #include <iostream>
@@ -71,7 +74,7 @@ public:
                - (static_cast<Rep>(T::Ratio::offset) / static_cast<Rep>(T::Ratio::scale));
     }
 
-    // TODO: Reenable if needed/wanted
+    // Reenable if wanted
     // template<
     //     typename T,
     //     std::enable_if_t<
@@ -438,3 +441,5 @@ inline Angle atan2(const double y, const double x) {
 }
 } // namespace math
 } // namespace ccunits
+
+#endif
