@@ -7,11 +7,10 @@ project(
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
-include(Conan)
-run_conan()
+enable_testing()
 
-# Make sure cmake picks up the conan packages instead of locally installed ones.
-include(${CMAKE_BINARY_DIR}/conan_paths.cmake)
+# # Make sure cmake picks up the conan packages instead of locally installed ones.
+# include(${CMAKE_BINARY_DIR}/conan_paths.cmake)
 
 include(CompilerOptions)
 

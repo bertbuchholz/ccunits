@@ -1,0 +1,66 @@
+image: gcc
+
+build:
+  stage: build
+  before_script:
+    # Delete the docker-specific configuration of apt as it
+    # is set up to remove downloaded packages. Also use apt-get, as
+    # apt seems to be set up to remove downloaded packages
+    - rm /etc/apt/apt.conf.d/docker*
+    - export APT_CACHE_DIR=${CI_PROJECT_DIR}/apt-cache
+    - mkdir -pv ${APT_CACHE_DIR}
+    - echo "Dir::Cache ${APT_CACHE_DIR};" > /etc/apt/apt.conf.d/00cache
+    - apt-get update -y
+    - apt-get -y install python3-pip cmake
+    - pip3 install --break-system-packages conan
+    # Make the conan cache inside the build dir so we can cache the
+    # dependencies for other pipelines (see cache: below)
+    - export CONAN_USER_HOME=${CI_PROJECT_DIR}/conan-cache
+    - conan profile detect
+    - conan config install -tf profiles conan/profiles/gcc14-cpp20
+    - conan profile show -pr gcc14-cpp20
+    - g++ --version
+  script:
+    # See https://docs.conan.io/en/latest/reference/env_vars.html#conan-sysrequires-mode
+    # This allows conan to install requirements from system packages (e.g., Debian)
+    - export CONAN_SYSREQUIRES_MODE=enabled
+    # Since the docker is run as root, we don't need sudo
+    - export CONAN_SYSREQUIRES_SUDO=0
+    - export CONAN_USER_HOME=${CI_PROJECT_DIR}/conan-cache
+    # Delete the system_reqs to trigger the system requirements installation even if
+    # the conan cache comes from a cache and wasn't freshly downloaded, see
+    # https://github.com/conan-io/conan/issues/2262
+    # - find ${CONAN_USER_HOME} -name "system_reqs" -type d -exec rm -rf {} \+
+    - conan install . --output-folder=build --build=missing --profile gcc14-cpp20
+    - cmake -S . -B build -D CMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake
+    - cmake --build build
+    - conan cache clean
+  cache:
+    key: conan-and-apt-cache
+    paths:
+      - conan-cache/
+      - apt-cache/
+  artifacts:
+    paths:
+      - build/
+
+test:
+  stage: test
+  cache:
+    key: conan-and-apt-cache
+    paths:
+      - conan-cache/
+      - apt-cache/
+    # Only download the cache, never push it
+    policy: pull
+  before_script:
+    - export APT_CACHE_DIR=${CI_PROJECT_DIR}/apt-cache && mkdir -pv ${APT_CACHE_DIR}
+    - echo "Dir::Cache ${APT_CACHE_DIR};" > /etc/apt/apt.conf.d/00cache
+    - apt-config dump | grep Dir::Cache
+    - apt-get update -y && apt-get -y install cmake
+  script:
+    - cd build
+    - ctest --output-on-failue --output-junit test_results/test_log.xml
+  artifacts:
+    reports:
+      junit: build/test_results/*.xml
