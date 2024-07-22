@@ -4,7 +4,11 @@ ccunits is (yet another) C++ header-only, compile time units library. It's simpl
 
 # Basic usage
 
-To use, just copy Units.h into your source directory.
+## Installation
+
+To use, just copy `lib/Units.h` into your source directory.
+
+Tested with g++ 12, g++ 14, clang 18 and msvc v143 (VS 2022)
 
 ## Example Coulomb's Law
 
